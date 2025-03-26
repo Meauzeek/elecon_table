@@ -1,0 +1,622 @@
+<html>
+<head>
+<style>
+/* Basic */
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #f0f0f0;
+}
+
+.table-container {
+    overflow-x: auto;
+    padding: 20px;
+    margin: 0 auto;
+    max-width: 90vw;
+}
+
+.periodic-table {
+    display: grid;
+    grid-template-columns: repeat(18, 40px);
+    gap: 2px;
+    margin: 0 auto;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.element {
+    aspect-ratio: 1;
+    padding: 3px;
+    text-align: center;
+    font-size: 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+    position: relative;
+    cursor: pointer;
+}
+
+.alkali-metal { background: rgb(236,127,130); }
+.alkaline-earth { background: rgb(239,170,102); }
+.transition-metal { background: rgb(254,221,130); }
+.post-transition { background: rgb(104,217,210); }
+.metalloid { background: rgb(102,200,236); }
+.nonmetal { background: rgb(151,174,219); }
+.halogen { background: rgb(200,150,210); }
+.noble-gas { background: rgb(200,200,200); }
+
+.element::after {
+    content: attr(data-category);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.element::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    border: 5px solid transparent;
+    border-top-color: rgba(0,0,0,0.9);
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.element:hover::after,
+.element:hover::before {
+    opacity: 1;
+}
+
+.element > br {
+    display: block;
+    margin: 2px 0;
+    line-height: 1.2;
+}
+
+#info-box {
+    width: 90%;
+    min-height: 60px;
+    margin: 20px auto;
+    padding: 15px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+#info-box::before {
+    content: '🔬';
+    float: right;
+    opacity: 0.2;
+}
+
+.element.active {
+    transform: scale(1.08);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.info-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.atomic-number {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.metrics-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.metric {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.metric label {
+    display: block;
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 6px;
+}
+
+.metric .value {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #2c3e50;
+}
+
+.remark {
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.remark label {
+    color: #666;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.info-section label {
+    color: rgb(0,154,255);
+    font-weight: bold;
+}
+
+.info-section p {
+    margin: 8px 0 0 0;
+    color: #444;
+}
+
+.bounty-condition label {
+    color: rgb(241,0,255);
+    font-weight: bold;
+}
+
+.bounty-condition p {
+    margin: 8px 0 0 0;
+    color: #444;
+}
+
+.info-category {
+    margin: 12px 0;
+    font-weight: bold;
+}
+
+.category-metal { color: rgb(223, 42, 46); }
+.category-nonmetal { color: rgb(0, 74, 255); }
+.category-noble-gas { color: rgb(120, 120, 120); }
+
+/* 新增按钮样式 */
+#reset-to-zero {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: rgb(200,200,200); /* 与稀有气体背景颜色一致 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* 与稀有气体阴影一致 */
+}
+</style>
+</head>
+<body>
+
+<div class="table-container">
+<div class="periodic-table">
+    <!-- 第1周期 -->
+    <div class="element nonmetal" data-period="1" style="grid-column:1" data-category="非金属(可作金属用)" title="氢">1<br>H</div>
+    <div class="element noble-gas" data-period="1" style="grid-column:18" data-category="稀有气体" title="氦">2<br>He</div>
+
+    <!-- 第2周期 -->
+    <div class="element alkali-metal" data-period="2" style="grid-column:1" data-category="金属" title="锂">3<br>Li</div>
+    <div class="element alkaline-earth" data-period="2" style="grid-column:2" data-category="金属" title="铍">4<br>Be</div>
+    <div style="grid-column:3/13; grid-row:2"></div>
+    <div class="element metalloid" data-period="2" style="grid-column:13" data-category="非金属" title="硼">5<br>B</div>
+    <div class="element nonmetal" data-period="2" style="grid-column:14" data-category="非金属" title="碳">6<br>C</div>
+    <div class="element nonmetal" data-period="2" style="grid-column:15" data-category="非金属" title="氮">7<br>N</div>
+    <div class="element nonmetal" data-period="2" style="grid-column:16" data-category="非金属" title="氧">8<br>O</div>
+    <div class="element halogen" data-period="2" style="grid-column:17" data-category="非金属" title="氟">9<br>F</div>
+    <div class="element noble-gas" data-period="2" style="grid-column:18" data-category="稀有气体" title="氖">10<br>Ne</div>
+
+    <!-- 第3周期 -->
+    <div class="element alkali-metal" data-period="3" style="grid-column:1" data-category="金属" title="钠">11<br>Na</div>
+    <div class="element alkaline-earth" data-period="3" style="grid-column:2" data-category="金属" title="镁">12<br>Mg</div>
+    <div style="grid-column:3/13; grid-row:3"></div>
+    <div class="element post-transition" data-period="3" style="grid-column:13" data-category="金属" title="铝">13<br>Al</div>
+    <div class="element metalloid" data-period="3" style="grid-column:14" data-category="非金属" title="硅">14<br>Si</div>
+    <div class="element nonmetal" data-period="3" style="grid-column:15" data-category="非金属" title="磷">15<br>P</div>
+    <div class="element nonmetal" data-period="3" style="grid-column:16" data-category="非金属" title="硫">16<br>S</div>
+    <div class="element halogen" data-period="3" style="grid-column:17" data-category="非金属" title="氯">17<br>Cl</div>
+    <div class="element noble-gas" data-period="3" style="grid-column:18" data-category="稀有气体" title="氩">18<br>Ar</div>
+
+    <!-- 第4周期 -->
+    <div class="element alkali-metal" data-period="4" style="grid-column:1" data-category="金属" title="钾">19<br>K</div>
+    <div class="element alkaline-earth" data-period="4" style="grid-column:2" data-category="金属" title="钙">20<br>Ca</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:3" data-category="金属" title="钪">21<br>Sc</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:4" data-category="金属" title="钛">22<br>Ti</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:5" data-category="金属" title="钒">23<br>V</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:6" data-category="金属" title="铬">24<br>Cr</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:7" data-category="金属" title="锰">25<br>Mn</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:8" data-category="金属" title="铁">26<br>Fe</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:9" data-category="金属" title="钴">27<br>Co</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:10" data-category="金属" title="镍">28<br>Ni</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:11" data-category="金属" title="铜">29<br>Cu</div>
+    <div class="element transition-metal" data-period="4" style="grid-column:12" data-category="金属" title="锌">30<br>Zn</div>
+    <div class="element post-transition" data-period="4" style="grid-column:13" data-category="金属" title="镓">31<br>Ga</div>
+    <div class="element metalloid" data-period="4" style="grid-column:14" data-category="金属" title="锗">32<br>Ge</div>
+    <div class="element metalloid" data-period="4" style="grid-column:15" data-category="非金属" title="砷">33<br>As</div>
+    <div class="element nonmetal" data-period="4" style="grid-column:16" data-category="非金属" title="硒">34<br>Se</div>
+    <div class="element halogen" data-period="4" style="grid-column:17" data-category="非金属" title="溴">35<br>Br</div>
+    <div class="element noble-gas" data-period="4" style="grid-column:18" data-category="稀有气体" title="氪">36<br>Kr</div>
+</div>
+</div>
+<button id="reset-to-zero">0号元素</button>
+<div id="info-box">
+    <div class="info-header">
+        <h3>0号元素（Nu）</h3>
+        <span class="atomic-number">序号：0</span>
+    </div>
+    <div class="info-category" style="color: rgb(120, 120, 120)">
+        分类：稀有气体
+    </div>
+    <br>
+    <div class="info-section">
+        <label>词条描述：</label>
+        <p>无限制，但选择该元素将无法获得“稀有气体”部分的元素分</p>
+    </div>
+    <div class="metrics-container">
+        <div class="metric">
+            <label>基础分</label>
+            <div class="value">0</div>
+        </div>
+        <div class="metric">
+            <label>悬赏分</label>
+            <div class="value">0</div>
+        </div>
+    </div>
+    <div class="remark">
+        <label>（TIPS：点击其余元素查看更多信息）</label>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const infoBox = document.getElementById('info-box');
+    const elements = document.querySelectorAll('.element');
+    const initialInfoHTML = infoBox.innerHTML;
+
+    const elementsData = {
+        'H': {
+            entryDescription: '文章主题与“起源”有关',
+            bountyCondition: '文章类型为层级，且须带有“<a href="https://backrooms-wiki-cn.wikidot.com/system:page-tags/tag/c1%E6%8A%A5%E5%91%8A#pages" target="_blank">c1报告</a>”标签',
+            weightCoefficient: 2,
+            weightScore: 3,
+            remark: '宇宙的起源。后室的起源。C层群的起源。'
+        },
+        'He': {
+            entryDescription: '文章总字数（包括代码）在4003字符及以下',
+            bountyCondition: '文章总字数（包括代码）在1008字符及以下',
+            weightCoefficient: 1,
+            weightScore: 5,
+            remark: 'He原子量约为4.003，H原子量约为1.008。'
+        },
+        'Li': {
+            entryDescription: '文章与“<a href="https://backrooms-wiki-cn.wikidot.com/the-e-p-b" target="_blank">正电子科技公司</a>”“<a href="https://backrooms-wiki-cn.wikidot.com/pallas-research-institute" target="_blank">帕拉斯研究所</a>” 或“<a href="https://backrooms-wiki-cn.wikidot.com/backrooms-robotics" target="_blank">后室机器人科技</a>”相关联',
+            bountyCondition: '文章中不能出现晚于2000年的电子产品',
+            weightCoefficient: 3,
+            weightScore: 4,
+            remark: '据非官方报告，后室中生产的80%的锂电池使用了E.P.B.的技术专利。'
+        },
+        'Be': {
+            entryDescription: '文章带有“毒性”或“矿物关联”标签',
+            bountyCondition: '文章与“<a href="https://backrooms-wiki-cn.wikidot.com/un-masked-canon-hub" target="_blank">揭开假面设定</a>”相关联',
+            weightCoefficient: 4,
+            weightScore: 2,
+            remark: '铍的名字源于绿柱石；铍和其多数简单化合物有剧毒。'
+        },
+        'B': {
+            entryDescription: '文章与至少3个层级<b>或</b>至少2个实体有紧密关联<i>（每个对象在文章中出现的次数不少于5次，下同）</i>',
+            bountyCondition: '文章与至少3个层级<b>和</b>至少2个实体有紧密关联',
+            weightCoefficient: 5,
+            weightScore: 3,
+            remark: '硼烷骨架中，相邻的3个硼原子通过共享2个电子形成三中心两电子键。'
+        },
+        'C': {
+            entryDescription: '文章与C层群有关，且具有下列任一标签：人类关联、动物关联、植物关联、生化',
+            bountyCondition: '文章中不出现任何地球上已知的生物（包括人类）',
+            weightCoefficient: 6,
+            weightScore: 4,
+            remark: '生命的骨架元素。（C层群=碳层群？）'
+        },
+        'N': {
+            entryDescription: '文章中强制出现一张空白透明的插图，大小和分辨率可自定。<i>（注：.png格式，全图填充为rgba(0, 0, 0, 0)色号）</i>',
+            bountyCondition: '文章与N层群（日文分部）有关',
+            weightCoefficient: 7,
+            weightScore: 2.5,
+            remark: '“这是一张纯净氮气的照片。”（N层群=氮层群？）'
+        },
+        'O': {
+            entryDescription: '文章带有“生存难度宜居”标签',
+            bountyCondition: '文章中除主角死亡外出现的所有角色全部存活',
+            weightCoefficient: 8,
+            weightScore: 2,
+            remark: '人类赖以生存的气体，但浓度过高也会致命。'
+        },
+        'F': {
+            entryDescription: '文章带有“生存难度死区”标签',
+            bountyCondition: '文章中除主角外出现的所有角色全部非正常死亡',
+            weightCoefficient: 9,
+            weightScore: 3,
+            remark: '令无数化学家命丧其手的死亡元素，最终被法国人莫瓦桑征服。'
+        },
+        'Ne': {
+            entryDescription: '文章具有“科幻”标签',
+            bountyCondition: '文章隶属“<a href="https://backrooms-wiki-cn.wikidot.com/simulation-canon" target="_blank">拟态设定</a>”，且所述内容隶属于第五纪元（公元3000-5000年）',
+            weightCoefficient: 2,
+            weightScore: 5,
+            remark: '赛博朋克：视觉美学下的霓虹（Neon）浪潮。'
+        },
+        'Na': {
+            entryDescription: '文章中出现一段激烈的冲突剧情',
+            bountyCondition: '文章与<a href="https://backrooms-wiki-cn.wikidot.com/level-11" target="_blank">Level 11</a>或<a href="https://backrooms-wiki-cn.wikidot.com/level-c-11" target="_blank">Level C-11</a>有关',
+            weightCoefficient: 4,
+            weightScore: 1,
+            remark: '“浮熔游响红。”'
+        },
+        'Mg': {
+            entryDescription: '文章出现与魔鬼有关的要素',
+            bountyCondition: '文章中出现<a href="https://backrooms-wiki-cn.wikidot.com/the-m-e-g" target="_blank">M.E.G.</a>，并扮演反派角色',
+            weightCoefficient: 5,
+            weightScore: 2,
+            remark: '早期镁因易燃特性曾被用作“燃烧镜”材料，但因难以储存，一度被称为“魔鬼”金属。（不是因为拼音首字母“MG”！）'
+        },
+        'Al': {
+            entryDescription: '文章与地球或前厅有关',
+            bountyCondition: '文章为前厅的子层级、房间或散乱报告集（可参考：<a href="https://backrooms-wiki-cn.wikidot.com/gutenberg-cap" target="_blank">古登堡之都</a>）',
+            weightCoefficient: 6,
+            weightScore: 4,
+            remark: '“氧硅铝铁钙”，铝是地壳中排行第一的金属。'
+        },
+        'Si': {
+            entryDescription: '文章具有“计算机”标签',
+            bountyCondition: '文章类型为实体，且须具有“智能”标签',
+            weightCoefficient: 7,
+            weightScore: 2,
+            remark: '具有智能的机器人能被称作硅基生命吗？'
+        },
+        'P': {
+            entryDescription: '文章为（或包含）一则怪谈',
+            bountyCondition: '文章具有“中华”标签',
+            weightCoefficient: 8,
+            weightScore: 1.5,
+            remark: '“那墓地里的森森白骨上，竟燃起了诡异的磷火……”'
+        },
+        'S': {
+            entryDescription: '文章中出现与以下任一词汇有关的伏笔并回收：火山、火药或火盐',
+            bountyCondition: '文章中出现时间线闭环',
+            weightCoefficient: 9,
+            weightScore: 3,
+            remark: '一硫二硝三木炭。'
+        },
+        'Cl': {
+            entryDescription: '文章出现海洋的概念，且所有内容情节发生在“海洋”中或“海面”上',
+            bountyCondition: '上述条件中的“海洋”环境不能是真实的海洋，须是比喻或抽象的“海洋”（如“岩浆海”“狄拉克之海”“索拉里斯之海”）',
+            weightCoefficient: 10,
+            weightScore: 3,
+            remark: '氯度是衡量海水组成的重要参数之一。'
+        },
+        'Ar': {
+            entryDescription: '除达成其他元素词条的强制条件外，文章不使用任何额外配图',
+            bountyCondition: '在上述条件下，文章还需遵循<a href="https://backrooms-wiki-cn.wikidot.com/2024-original-point-contest" target="_blank">一元复始竞赛</a>的竞赛规则。（违规不会取消参赛资格，仅影响此词条的判定）',
+            weightCoefficient: 3,
+            weightScore: 5,
+            remark: '作者像氩气一样“懒惰”，以至于图片都懒得找——代码也不想敲。'
+        },
+        'K': {
+            entryDescription: '文章与一篇<a href="https://backrooms-wiki-cn.wikidot.com/contest-archive-cn" target="_blank">历年竞赛</a>的冠军相关',
+            bountyCondition: '文章同时与一篇历年竞赛的第三名相关',
+            weightCoefficient: 5,
+            weightScore: 3,
+            remark: '1.“钾钙钠镁铝，锌铁锡铅氢，铜汞银铂金。”  2.“锂钠钾铷铯钫。”'
+        },
+        'Ca': {
+            entryDescription: '文章带有“洞穴”标签，且生存难度等级为0、1或2',
+            bountyCondition: '文章为任一<a href="https://backrooms-wiki-cn.wikidot.com/system:page-tags/tag/%E6%B4%9E%E7%A9%B4#pages" target="_blank">洞穴层级</a>的子区集',
+            weightCoefficient: 6,
+            weightScore: 1.5,
+            remark: '洞穴里钟乳石等多种矿物的主要成分是碳酸钙。'
+        },
+        'Sc': {
+            entryDescription: '文章中出现不完整的档案记录，且具有“格式错乱”标签',
+            bountyCondition: '文章与<a href="https://backrooms-wiki-cn.wikidot.com/system:page-tags/tag/%E7%BE%A4%E5%B2%9B%E8%AE%BE%E5%AE%9A#pages" target="_blank">群岛设定</a>相关联',
+            weightCoefficient: 6.5,
+            weightScore: 1.5,
+            remark: '钪稀散地分布于各种矿物中，恰如这残缺的线索一般难以捉摸。'
+        },
+        'Ti': {
+            entryDescription: '文章与太空或航天技术有关，且具有“<a href="https://backrooms-wiki-cn.wikidot.com/system:page-tags/tag/%E4%BA%BA%E7%B1%BB%E5%A4%A9%E6%96%87%E5%AD%A6%E7%AE%A1%E7%90%86%E5%B1%80#pages" target="_blank">人类天文学管理局</a>”标签',
+            bountyCondition: '文章与<a href="https://backrooms-wiki-cn.wikidot.com/level-78" target="_blank">Level 78</a>, <a href="https://backrooms-wiki-cn.wikidot.com/level-c-24" target="_blank">Level 110 (C-24)</a>或<a href="https://backrooms-wiki-cn.wikidot.com/level-599" target="_blank">Level 599</a>相关联',
+            weightCoefficient: 6.5,
+            weightScore: 2,
+            remark: '钛被称为航天金属。'
+        },
+        'V': {
+            entryDescription: '文章包含一篇神话故事',
+            bountyCondition: '文章带有“故事”标签，且包含一篇已有神话故事的新编',
+            weightCoefficient: 6.5,
+            weightScore: 3.5,
+            remark: '钒的名称Vanadium源自北欧神话中的女神 Vanadis。'
+        },
+        'Cr': {
+            entryDescription: '文章中不出现任何描写颜色的词语',
+            bountyCondition: '文章与<a href="https://backrooms-wiki-cn.wikidot.com/level-c-5" target="_blank">Level C-5</a>有紧密关联<i>（对象出现次数不少于5次）</i>',
+            weightCoefficient: 6.5,
+            weightScore: 4.5,
+            remark: '纵使化合物色彩缤纷，金属铬仍留银灰本色。'
+        },
+        'Mn': {
+            entryDescription: '文章中出现了不少于7处脚注',
+            bountyCondition: '文章具有不少于7个附录',
+            weightCoefficient: 6.5,
+            weightScore: 3.5,
+            remark: '锰元素的最高价态是+7价。'
+        },
+        'Fe': {
+            entryDescription: '文章中描述一种“吸引”现象或关系',
+            bountyCondition: '文章带有“<a href="https://backrooms-wiki-cn.wikidot.com/system:page-tags/tag/%E9%93%81%E6%8B%B3" target="_blank">铁拳</a>”标签',
+            weightCoefficient: 6.5,
+            weightScore: 4,
+            remark: '铁具有铁磁性，能被磁铁吸引。'
+        },
+        'Co': {
+            entryDescription: '文章使用“<a href="https://backrooms-wiki-cn.wikidot.com/theme:aero-glass" target="_blank">Aero Glass</a>”版式',
+            bountyCondition: '全文文本描述中不出现任意 “蓝色”以外的颜色要素',
+            weightCoefficient: 6.5,
+            weightScore: 2.5,
+            remark: '钴离子能使玻璃变蓝。'
+        },
+        'Ni': {
+            entryDescription: '以“欺骗”为文章主题写作',
+            bountyCondition: '文章为层级，且包含“宜居欺骗”或“死区欺骗”的情节',
+            weightCoefficient: 6.5,
+            weightScore: 1,
+            remark: '中世纪欧洲矿工在开采红砷镍矿，误以为它是含铜矿物，但始终无法提炼出铜，认为是被“恶魔”（Nickel）欺骗。'
+        },
+        'Cu': {
+            entryDescription: '在文章中描写一场祭祀活动',
+            bountyCondition: '文章与“<a href="https://backrooms-wiki-cn.wikidot.com/the-lost" target="_blank">失落一族</a>”相关联',
+            weightCoefficient: 6.5,
+            weightScore: 1,
+            remark: '铜曾用作铸造祭祀用的礼器。'
+        },
+        'Zn': {
+            entryDescription: '在文章中引用一段中国古籍（明代及以前）中的话',
+            bountyCondition: '全文用文言文写作，也包括古诗文（古体诗、近体诗、词、曲）的形式',
+            weightCoefficient: 6.5,
+            weightScore: 5,
+            remark: '“凡倭铅（锌）古书本无之，乃近世所立名色。”——《天工开物》[明] 宋应星'
+        },
+        'Ga': {
+            entryDescription: '文章与<a href="https://backrooms-wiki-cn.wikidot.com/level-75" target="_blank">Level 75</a>（“镓洞”）紧密关联<i>（对象出现次数不少于5次）</i>',
+            bountyCondition: '文章不出现“镓”“Ga”“Gallium”及其他同义字词，且不带有“洞穴”标签',
+            weightCoefficient: 7,
+            weightScore: 3,
+            remark: '字面意思：镓是一种熔点很低的金属，洞是一种常见的地质结构。'
+        },
+        'Ge': {
+            entryDescription: '文章描述一种“预言”并成功应验',
+            bountyCondition: '文章隶属“<a href="https://backrooms-wiki-cn.wikidot.com/backrooms-conspiracy" target="_blank">后室阴谋论</a>”设定',
+            weightCoefficient: 8,
+            weightScore: 3,
+            remark: '门捷列夫预言中的“类硅”元素，被温克勒所验证。'
+        },
+        'As': {
+            entryDescription: '文章（或档案）表现出明显的篡改痕迹，且使用“修正”生存难度',
+            bountyCondition: '档案拥有不少于三个修改的版本',
+            weightCoefficient: 9,
+            weightScore: 3,
+            remark: '“信口雌黄”中的“雌黄”指的是三硫化二砷。'
+        },
+        'Se': {
+            entryDescription: '文章中出现两个（或以上）“月亮”的意象',
+            bountyCondition: '文章带有“神性”或“rede实体”标签',
+            weightCoefficient: 10,
+            weightScore: 2,
+            remark: '“硒”的名字Selenium源于希腊神话中的月亮女神Selene，她曾被罗马神话中的月亮女神Luna吞并。'
+        },
+        'Br': {
+            entryDescription: '文章与其他世界观分支下的后室（包括但不限于Fandom 后室中文维基或阈限档案）有关，且需要带有“crossover”标签',
+            bountyCondition: '文章同时与SCP基金会相关联',
+            weightCoefficient: 11,
+            weightScore: 5,
+            remark: '前管理员Cambrian White曾调侃：为什么后室（BR）有两大主要站点？因为溴（Br₂）是双原子分子！'
+        },
+        'Kr': {
+            entryDescription: '文章带有“隐秘系列”标签',
+            bountyCondition: '文章不能带有“层级”标签',
+            weightCoefficient: 4,
+            weightScore: 3,
+            remark: '“氪”的名字Krypton源于希腊语“κρυπτός”（kryptós），意为“隐藏的”或“秘密的”。（与超人的氪石无关！与氪金 [課金] 无关！）'
+        },
+    };
+
+    function handleElementClick(event) {
+        elements.forEach(el => el.classList.remove('active'));
+        const element = event.currentTarget;
+        element.classList.add('active');
+        const category = element.dataset.category;
+        const name = element.title;
+        const symbol = element.querySelector('br').nextSibling.textContent;
+        const number = element.firstChild.textContent;
+        const categoryColorMap = {
+            '金属': 'category-metal',
+            '非金属': 'category-nonmetal',
+            '稀有气体': 'category-noble-gas'
+        };
+        const data = elementsData[symbol] || {};
+        infoBox.innerHTML = `
+            <div class="info-header">
+                <h3>${element.title}（${symbol}）</h3>
+                <span class="atomic-number">序号：${element.firstChild.textContent}</span>
+            </div>
+            <div class="info-category ${categoryColorMap[category] || ''}">
+                分类：${category}
+            </div>
+            <br>
+            <div class="info-section">
+                <label>词条描述：</label>
+                <p>${data.entryDescription || '暂无描述'}</p>
+            </div>
+            ${data.bountyCondition ? `
+            <br>
+            <div class="bounty-condition">
+                <label>悬赏条件：</label>
+                <p>${data.bountyCondition}</p>
+            </div>
+            ` : ''}
+            <div class="metrics-container">
+                <div class="metric">
+                    <label>基础分</label>
+                    <div class="value">${data.weightCoefficient || '-'}</div>
+                </div>
+                <div class="metric">
+                    <label>悬赏分</label>
+                    <div class="value">${data.weightScore || '-'}</div>
+                </div>
+            </div>
+            <div class="remark">
+                <label>${data.remark || '无特殊备注'}</label>
+            </div>
+        `;
+    }
+
+    elements.forEach(element => {
+        element.addEventListener('click', handleElementClick);
+    });
+
+    // 新增：点击“0号元素”按钮重置
+    const resetButton = document.getElementById('reset-to-zero');
+    resetButton.addEventListener('click', () => {
+        elements.forEach(el => el.classList.remove('active'));
+        infoBox.innerHTML = initialInfoHTML;
+    });
+});
+</script>
+
+</body>
+</html>
