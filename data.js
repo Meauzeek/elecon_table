@@ -190,6 +190,17 @@ OFF_GRID.push(
  O('HI','陽彩','Hiiro / hi_iro','天芥的虚拟实体变体','女（DNE）','未详','网络 / PASC 深层','原本只是天芥的 Vtuber 形象，却可能已脱离物理本体成为独立数据实体，占据幽灵席位“光环”。',['竹廼门天芥：原型与虚拟变体'],'scp')
 );
 
+delete DERIVATIVES.Ni;
+DERIVATIVES.B=[
+ {code:'AY',name:'安纾雅',note:'硼基同源个体',targetOff:'AY'},
+ {code:'PY',name:'蓬曜凇',note:'硼基意识体',targetOff:'PY'}
+];
+DERIVATIVES.Xe=[{code:'ST',name:'斯蒂芬妮',note:'堂姐 · 考古学者',targetOff:'ST'}];
+DERIVATIVES.Hg=[
+ {code:'HS',name:'赫斯珀洛斯',note:'少年人格',profile:C('赫斯珀洛斯','Hesperos Angelopoulos','约15岁','男','希腊雅典','汞元素使；少年人格','他是这具汞人偶较常示人的少年人格，习惯用强硬和嘲讽遮住不安。身体、声线与外貌都能像液态金属一样改换，但他仍把自己与盖琳视作同一段生命的两种回答。',['盖琳：共用身体的另一人格','塔里亚·班纳、苻榭：秘密委托关系'],'acs')},
+ {code:'GL',name:'盖琳',note:'少女人格',profile:C('盖琳·安哲罗普洛斯','Galene Angelopoulos','约15岁','女','希腊雅典','汞元素使；少女人格','她是较少直接现身的少女人格，比赫斯珀洛斯更敏锐，也更容易察觉他人善意里的危险。两个人格共享记忆与汞构成的身体，却保留各自的语气、判断和防御方式。',['赫斯珀洛斯：共用身体的另一人格','伍：其善意曾使防御出现裂痕'],'acs')}
+];
+
 Object.assign(OFF_GRID.find(x=>x.code==='EN'),{gender:'女',age:'青年',origin:'爱伊忒拿',group:'爱伊忒拿观察体系'});
 Object.assign(OFF_GRID.find(x=>x.code==='DD'),{gender:'男',age:'青年',origin:'中国重庆市渝中区；爱伊忒拿观察任务身份',group:'Juno 关联个体',affinity:'juno'});
 Object.assign(OFF_GRID.find(x=>x.code==='VN'),{gender:'女',age:'青年',origin:'爱伊忒拿',group:'爱伊忒拿第一批培育个体'});
