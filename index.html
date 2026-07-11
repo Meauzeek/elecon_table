@@ -31,17 +31,13 @@
       <div class="eyebrow">PERIODIC CHARACTER INDEX / 档案版本 1.0</div>
       <div class="hero-grid">
         <div><h1>元素人物志</h1><p>把元素看作能力的坐标，也把人看作无法被坐标说尽的变量。点击已点亮的格子，读取元素简报与人物档案。</p></div>
-        <div class="hero-stats"><div><strong id="record-count">—</strong><span>已收录角色</span></div><div><strong>3+3</strong><span>主题与夜间模式</span></div><div><strong>126</strong><span>观测上限</span></div></div>
+        <div class="hero-stats"><div><strong id="record-count">—</strong><span>已收录角色</span></div><div><strong>5×2</strong><span>主题与昼夜模式</span></div><div><strong>126</strong><span>观测上限</span></div></div>
       </div>
       <div id="legend" class="legend"><span><i class="dot active"></i>已有档案</span><span><i class="dot vacant"></i>未观测</span><span><i class="dot special"></i>特殊序号</span><span>悬停带有 <b>＋</b> 的格子可展开关联个体</span></div>
     </section>
 
     <section class="table-section" aria-labelledby="table-title">
       <div class="section-head"><div><span class="index">01</span><h2 id="table-title">元素使周期表</h2></div><p>横向滑动以查看完整表格</p></div>
-      <div class="special-strip" aria-label="特殊元素序列">
-        <div class="special-strip-title"><b>特殊序列</b><span>独立编号，不参与下方连续原子序数排布</span></div>
-        <div id="special-strip"></div>
-      </div>
       <div class="table-scroll"><div id="periodic-table" class="periodic-table" role="grid" aria-label="元素使周期表"></div></div>
       <div class="series-label"><span>镧系 / LANTHANIDES</span><span>锕系 / ACTINIDES</span></div>
     </section>
@@ -57,7 +53,7 @@
     <button class="dialog-close" type="button" aria-label="关闭">×</button>
     <div id="profile-content"></div>
   </dialog>
-  <aside id="debug-bar" class="debug-bar" hidden><b>调试模式</b><span>打开人物卡后可直接修改文字。</span><button id="export-edits" type="button">导出修改 JS</button><button id="exit-debug" type="button">退出</button></aside>
+  <aside id="debug-bar" class="debug-bar" hidden><b>调试模式</b><span>可编辑空白元素与现有档案。</span><button id="add-off-grid" type="button">新增表外人物</button><button id="delete-entry" type="button">删除当前条目</button><button id="export-edits" type="button">导出修改 JS</button><button id="exit-debug" type="button">退出</button></aside>
   <div id="juno-floaters" class="juno-floaters" aria-hidden="true"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="data.js"></script>
