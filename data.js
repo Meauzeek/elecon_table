@@ -149,7 +149,7 @@ Object.assign(CHARACTERS.Pb,{origin:'中国河北省唐山市'});
 Object.assign(CHARACTERS.Bi,{origin:'爱伊忒拿 / 平行现实“黑铁垭”小镇'});
 Object.assign(CHARACTERS.Rn,{origin:'荷兰奈梅亨',affinity:'scp'});
 Object.assign(CHARACTERS.U,{origin:'美国新墨西哥州洛斯阿拉莫斯；祖籍浙江绍兴；后居旧金山'});
-Object.assign(CHARACTERS.Og,{age:'105岁（1933–2038）',origin:'苏联 / 俄罗斯莫斯科'});
+Object.assign(CHARACTERS.Og,{age:'105岁（1933–2038）',origin:'俄罗斯莫斯科'});
 Object.assign(SPECIAL.Nu.character,{age:'18岁（2022–2040）',gender:'男性 → 中性 / 后期无性',origin:'法国奥恩省勒勒努阿尔村',affinity:'scp'});
 
 /* Juno 三连：三个人，不合并人格 */
