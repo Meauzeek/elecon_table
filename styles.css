@@ -22,4 +22,3 @@ body[data-theme="antarctic"] .masthead{background:#17394f;border-bottom-color:#7
 @media(max-width:560px){.brand small{display:none}.brand b{font-size:11px}.toolbar{gap:5px}.select-wrap select,.icon-btn{height:36px}.hero-stats{gap:7px}.hero-stats div{min-width:0}.hero-stats strong{font-size:22px}.section-head p{display:none}.special-card{width:calc(50% - 4px)}.profile-dialog{width:100vw;max-height:100vh}.media-panel.with-image{grid-template-columns:1fr}.true-atom{transform:scale(.86)}.debug-bar span{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 .has-satellite:hover,.has-satellite:focus-within,.has-satellite.satellite-open{z-index:100}.has-satellite.satellite-open .satellites{visibility:visible;opacity:1;pointer-events:auto}.satellite{pointer-events:auto;z-index:101}
-
