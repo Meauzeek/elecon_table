@@ -133,4 +133,3 @@ document.body.dataset.mode=localStorage.getItem('stellalogue-mode')||(matchMedia
 document.body.classList.toggle('character-colors-off',!useCharacterColor);colorToggle.classList.toggle('active',useCharacterColor);
 rebuildRegistry();renderTable();renderSpecial();renderOffGrid();
 $('#record-count').textContent=REGISTRY.size;
-
