@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s);
 const table=$('#periodic-table'),offGrid=$('#off-grid');
 const dialog=$('#profile-dialog'),content=$('#profile-content'),themeSelect=$('#theme-select');
-const filterSelect=$('#filter-select'),modeToggle=$('#mode-toggle'),colorToggle=$('#color-toggle');
+const filterSelect=$('#filter-select'),groupSelect=$('#group-select'),modeToggle=$('#mode-toggle'),colorToggle=$('#color-toggle');
 const toast=$('#toast'),legend=$('#legend'),debugBar=$('#debug-bar');
 const atomicNumber=s=>ORDER.indexOf(s)+1;
 const esc=v=>String(v??'未详').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -31,12 +31,12 @@ function cell(symbol,row,col){
   <span class="element-number">${z}</span><span class="element-symbol">${symbol}</span><span class="element-name">${esc(ELEMENT_NAMES[symbol])}${duplicate?'系':''}</span>${p?'<span class="archive-mark">●</span>':''}${satellitesFor(symbol)}
  </div>`;
 }
-function renderTable(){table.innerHTML=ROWS.map((r,ri)=>r.map((s,ci)=>cell(s,ri+2,ci+1)).join('')).join('');renderSpecial();applyFilter()}
+function renderTable(){table.innerHTML=ROWS.map((r,ri)=>r.map((s,ci)=>cell(s,ri+2,ci+1)).join('')).join('');renderSpecial();applyFilter();applyGroupFilter()}
 function renderSpecial(){
- table.insertAdjacentHTML('beforeend',Object.entries(SPECIAL).map(([key,x])=>`<button type="button" class="special-card grid-special ${key.toLowerCase()}" data-profile="special:${key}" data-search="${esc((key+' '+x.name+' '+x.character.name).toLowerCase())}" style="--character:${colorFor(key)};grid-row:${key==='Nu'?1:10};grid-column:${key==='Nu'?18:1}"><span class="element-number">${x.z}</span><strong>${key}</strong><span>${esc(x.name)}</span><small>${key==='Nu'?'中子特殊序列':'理论扩展序列'}</small></button>`).join(''))
+ table.insertAdjacentHTML('beforeend',Object.entries(SPECIAL).map(([key,x])=>`<button type="button" class="special-card grid-special ${key.toLowerCase()}" data-profile="special:${key}" data-search="${esc((key+' '+x.name+' '+x.character.name).toLowerCase())}" style="--character:${colorFor(key)};grid-row:${key==='Nu'?1:10};grid-column:${key==='Nu'?18:1}"><span class="element-number">${x.z}</span><strong>${key}</strong><span>${esc(x.name)}</span><small>${key==='Nu'?'中子特殊序列':'理论扩展序列'}</small><span class="archive-mark">●</span></button>`).join(''))
 }
 function renderOffGrid(){
- offGrid.innerHTML=activeOffGrid().map(p=>`<button class="off-card ${p.affinity||''}" type="button" data-profile="off:${p.code}" data-search="${esc((p.code+' '+p.name+' '+(p.latin||'')).toLowerCase())}" style="--character:${colorFor(p.code)}"><span class="off-code">${esc(p.code)}</span><h3>${esc(p.name)}</h3><p>${esc(p.type||'表外个体')}<br>${esc(p.latin)}</p></button>`).join('');applyFilter()
+ offGrid.innerHTML=activeOffGrid().map(p=>`<button class="off-card ${p.affinity||''}" type="button" data-profile="off:${p.code}" data-search="${esc((p.code+' '+p.name+' '+(p.latin||'')).toLowerCase())}" style="--character:${colorFor(p.code)}"><span class="off-code">${esc(p.code)}</span><h3>${esc(p.name)}</h3><p>${esc(p.type||'表外个体')}<br>${esc(p.latin)}</p><span class="archive-mark">●</span></button>`).join('');applyFilter();applyGroupFilter()
 }
 
 const REGISTRY=new Map();
@@ -47,6 +47,7 @@ function rebuildRegistry(){
  activeOffGrid().forEach(p=>REGISTRY.set(`off:${p.code}`,{id:`off:${p.code}`,p,meta:{code:p.code,type:p.type,kind:'off'}}));
  Object.entries(DERIVATIVES).forEach(([s,list])=>list.forEach(d=>{if(d.profile)REGISTRY.set(`der:${s}:${d.code}`,{id:`der:${s}:${d.code}`,p:d.profile,meta:{code:d.code,type:d.note,kind:'derivative'}});else if(d.target)REGISTRY.set(`der:${s}:${d.code}`,{redirect:`el:${d.target}`});else if(d.targetOff)REGISTRY.set(`der:${s}:${d.code}`,{redirect:`off:${d.targetOff}`})}));
  $('#record-count').textContent=REGISTRY.size;
+ populateGroupFilter();
 }
 function openById(id){const item=REGISTRY.get(id);if(!item)return showToast('该人物尚未建立可跳转档案');if(item.redirect)return openById(item.redirect);openProfile(id,item.p,item.meta)}
 
@@ -94,18 +95,21 @@ function profileHTML(id,raw,meta){
 function applySmartTheme(p){if(themeSelect.value==='smart')document.body.dataset.theme=p.affinity||'acs'}
 function openProfile(id,p,meta){applySmartTheme(p);const data=profileWithEdits(id,p),accent=useCharacterColor?(data.color||colorFor(id)):'var(--accent)';dialog.style.setProperty('--profile-accent',accent);dialog.style.setProperty('--profile-on-accent',useCharacterColor?colorText(data.color||colorFor(id)):'var(--on-accent)');content.innerHTML=profileHTML(id,p,meta);if(!dialog.open)dialog.showModal();dialog.scrollTop=0}
 
-function nationality(p){const o=p.origin||'';if(/爱伊忒拿|陵墓/.test(o))return'爱伊忒拿 / 陵墓';if(/中国|南京|武汉|青岛|天津|上海|合肥|厦门|苏州|郑州|哈尔滨|西安|太原|佛山/.test(o))return'中国';if(/日本|东京|青森|和歌山/.test(o))return'日本';if(/美国|阿卡迪亚|加拿大|巴西|阿根廷|拉普拉塔/.test(o))return'美洲';if(/法国|英国|西班牙|比利时|荷兰|奥地利|芬兰|希腊|俄罗斯|苏联|丹麦/.test(o))return'欧洲';if(/高丽|朝鲜/.test(o))return'高丽';return'其他 / 未详'}
+function nationality(p){const o=p.origin||'';if(/爱伊忒拿|陵墓/.test(o))return'爱伊忒拿 / 陵墓';if(/中国|南京|武汉|青岛|天津|上海|合肥|厦门|苏州|郑州|哈尔滨|西安|太原|佛山|重庆|赣州|成都|北京|开封|唐山|文昌|香港/.test(o))return'中国';if(/日本|东京|青森|和歌山|新潟/.test(o))return'日本';if(/美国|阿卡迪亚|洛斯阿拉莫斯|旧金山|加利福尼亚|佛罗里达/.test(o))return'美国';if(/英国|利物浦|牛津|因弗内斯/.test(o))return'英国';if(/法国|巴黎|奥恩|勒勒努阿尔/.test(o))return'法国';if(/俄罗斯|苏联|莫斯科/.test(o))return'俄罗斯';if(/加拿大|魁北克/.test(o))return'加拿大';if(/巴西|里约热内卢/.test(o))return'巴西';if(/阿根廷|拉普拉塔/.test(o))return'阿根廷';if(/奥地利|维也纳/.test(o))return'奥地利';if(/西班牙/.test(o))return'西班牙';if(/比利时/.test(o))return'比利时';if(/荷兰/.test(o))return'荷兰';if(/芬兰/.test(o))return'芬兰';if(/希腊|雅典/.test(o))return'希腊';if(/丹麦/.test(o))return'丹麦';if(/高丽|朝鲜/.test(o))return'高丽';return'其他 / 未详'}
 function ageBand(p){const a=p.age||'';const n=parseInt((a.match(/\d+/)||[])[0]);if(!n)return'未详';if(n<16)return'15岁及以下';if(n<=19)return'16–19岁';if(n<=29)return'20–29岁';return'30岁及以上'}
 function genderBand(p){const g=p.gender||'';if(/女/.test(g)&&!/男\s*\//.test(g))return'女';if(/男/.test(g)&&!/女/.test(g))return'男';if(/无|中性|不详|存疑|形态/.test(g))return'其他 / 未详';return'其他 / 未详'}
-const FILTER_COLORS={gender:{'女':'#E85D9E','男':'#3F7EDB','其他 / 未详':'#8B8E98'},nation:{'中国':'#D94A45','日本':'#D879A0','欧洲':'#3767A6','美洲':'#3C9A65','高丽':'#6A78C7','爱伊忒拿 / 陵墓':'#29AEB0','其他 / 未详':'#858B95'},age:{'15岁及以下':'#7EC8E3','16–19岁':'#59A96A','20–29岁':'#E8B34F','30岁及以上':'#C66A55','未详':'#8B8E98'}};
+function themeBand(p){return({acs:'ACS',antarctic:'南极',aero:'Aëterna / Aero',juno:'Juno',scp:'SCP'})[p.affinity||'acs']||'ACS'}
+const FILTER_COLORS={theme:{'ACS':'#1769AA','南极':'#79BFE5','Aëterna / Aero':'#52B9A6','Juno':'#E85A9B','SCP':'#8B1A1A'},gender:{'女':'#E85D9E','男':'#3F7EDB','其他 / 未详':'#8B8E98'},nation:{'中国':'#D84A45','日本':'#D9799E','美国':'#3C7A57','英国':'#5D65A8','法国':'#3E79B7','俄罗斯':'#9A4F55','加拿大':'#B65C54','巴西':'#4E9660','阿根廷':'#65A8C5','奥地利':'#8E657D','西班牙':'#C98443','比利时':'#B79B48','荷兰':'#D86C42','芬兰':'#5B8CAB','希腊':'#477DB2','丹麦':'#A9525B','高丽':'#6A78C7','爱伊忒拿 / 陵墓':'#29AEB0','其他 / 未详':'#858B95'},age:{'15岁及以下':'#7EC8E3','16–19岁':'#59A96A','20–29岁':'#E8B34F','30岁及以上':'#C66A55','未详':'#8B8E98'}};
 function datumForNode(el){const id=el.dataset.profile;if(!id)return null;const item=REGISTRY.get(id);if(!item||item.redirect)return null;return profileWithEdits(id,item.p)}
 function applyFilter(){
  if(!filterSelect)return;const mode=filterSelect.value,palette=FILTER_COLORS[mode]||{};
  document.body.dataset.filter=mode;
- document.querySelectorAll('[data-profile].element-card,[data-profile].off-card,.special-card').forEach(el=>{const p=datumForNode(el);if(!p)return;const cat=mode==='gender'?genderBand(p):mode==='nation'?nationality(p):mode==='age'?ageBand(p):'';el.style.setProperty('--filter-color',palette[cat]||'transparent');el.dataset.category=cat});
+ document.querySelectorAll('[data-profile].element-card,[data-profile].off-card,.special-card').forEach(el=>{const p=datumForNode(el);if(!p)return;const cat=mode==='theme'?themeBand(p):mode==='gender'?genderBand(p):mode==='nation'?nationality(p):mode==='age'?ageBand(p):'';el.style.setProperty('--filter-color',palette[cat]||'transparent');el.dataset.category=cat});
  if(mode==='off')legend.innerHTML='<span><i class="dot active"></i>已有档案</span><span><i class="dot vacant"></i>未观测</span><span><i class="dot special"></i>特殊序号</span><span>悬停带有 <b>＋</b> 的格子可展开关联个体</span>';
  else legend.innerHTML=Object.entries(palette).map(([k,c])=>`<span><i class="dot" style="background:${c}"></i>${esc(k)}</span>`).join('');
 }
+function populateGroupFilter(){if(!groupSelect)return;const previous=groupSelect.value||'all',groups=new Set();for(const [id,item] of REGISTRY){if(item.redirect||!item.p||id.startsWith('der:'))continue;groups.add(groupFor(id,profileWithEdits(id,item.p)))}groupSelect.innerHTML='<option value="all">全部团体</option>'+[...groups].sort((a,b)=>a.localeCompare(b,'zh-CN')).map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');groupSelect.value=[...groupSelect.options].some(o=>o.value===previous)?previous:'all'}
+function applyGroupFilter(){if(!groupSelect)return;const selected=groupSelect.value;document.querySelectorAll('[data-profile].element-card,[data-profile].off-card,.special-card').forEach(el=>{const id=el.dataset.profile,item=REGISTRY.get(id);if(!item||item.redirect)return;const group=groupFor(id,profileWithEdits(id,item.p)),members=group.split(/\s*\/\s*/);el.classList.toggle('group-hidden',selected!=='all'&&group!==selected&&!members.includes(selected));el.dataset.group=group})}
 
 document.addEventListener('click',e=>{
  const link=e.target.closest('[data-profile]');if(link&&link.dataset.profile){e.preventDefault();return openById(link.dataset.profile)}
@@ -128,6 +132,7 @@ $('#exit-debug').addEventListener('click',()=>{debugMode=false;debugBar.hidden=t
 $('#export-edits').addEventListener('click',()=>{const js=`const CHARACTER_OVERRIDES = ${JSON.stringify(DEBUG_EDITS,null,2)};\n`;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([js],{type:'text/javascript;charset=utf-8'}));a.download='character-overrides.js';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
 themeSelect.addEventListener('change',()=>{if(themeSelect.value!=='smart')document.body.dataset.theme=themeSelect.value;else{document.body.dataset.theme='acs';showToast('打开人物卡时自动匹配主题')}});
 filterSelect.addEventListener('change',applyFilter);
+groupSelect.addEventListener('change',applyGroupFilter);
 modeToggle.addEventListener('click',()=>{document.body.dataset.mode=document.body.dataset.mode==='dark'?'light':'dark';localStorage.setItem('stellalogue-mode',document.body.dataset.mode)});
 colorToggle.addEventListener('click',()=>{useCharacterColor=!useCharacterColor;colorToggle.classList.toggle('active',useCharacterColor);colorToggle.setAttribute('aria-pressed',String(useCharacterColor));document.body.classList.toggle('character-colors-off',!useCharacterColor);localStorage.setItem('stellalogue-character-colors',useCharacterColor?'on':'off');showToast(useCharacterColor?'已启用人物代表色':'已使用主题默认色')});
 function showToast(t){toast.textContent=t;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),1700)}
